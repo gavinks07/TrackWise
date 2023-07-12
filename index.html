@@ -99,6 +99,19 @@
     th {
       background-color: #f2f2f2;
     }
+    
+    .selected {
+      background-color: #e0e0e0;
+    }
+    
+    .buttons {
+      display: flex;
+      margin-top: 10px;
+    }
+    
+    .buttons button {
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -113,6 +126,7 @@
             <th>Date</th>
             <th>Description</th>
             <th>Amount</th>
+            <th>Select</th>
           </tr>
         </thead>
         <tbody>
@@ -127,6 +141,7 @@
             <th>Date</th>
             <th>Description</th>
             <th>Amount</th>
+            <th>Select</th>
           </tr>
         </thead>
         <tbody>
@@ -135,6 +150,13 @@
       </table>
       
       <div class="total-amount" id="totalAmount"></div> <!-- Total amount box -->
+      
+      <div class="buttons">
+        <button onclick="moveSelectedItems('expenseTable', 'profitTable')">Move to Profits</button>
+        <button onclick="moveSelectedItems('profitTable', 'expenseTable')">Move to Expenses</button>
+        <button onclick="removeSelectedItems('expenseTable')">Remove Expenses</button>
+        <button onclick="removeSelectedItems('profitTable')">Remove Profits</button>
+      </div>
     </div>
     
     <div class="form-group">
@@ -183,10 +205,12 @@
       var dateCell = row.insertCell(0);
       var descriptionCell = row.insertCell(1);
       var amountCell = row.insertCell(2);
+      var selectCell = row.insertCell(3);
       
       dateCell.innerHTML = date;
       descriptionCell.innerHTML = description;
       amountCell.innerHTML = '$' + amount;
+      selectCell.innerHTML = '<input type="checkbox">';
       
       // Clear the form fields
       document.getElementById('expenseDate').value = '';
@@ -208,10 +232,12 @@
       var dateCell = row.insertCell(0);
       var descriptionCell = row.insertCell(1);
       var amountCell = row.insertCell(2);
+      var selectCell = row.insertCell(3);
       
       dateCell.innerHTML = date;
       descriptionCell.innerHTML = description;
       amountCell.innerHTML = '$' + amount;
+      selectCell.innerHTML = '<input type="checkbox">';
       
       // Clear the form fields
       document.getElementById('profitDate').value = '';
@@ -253,10 +279,10 @@
     
     // Get table data as an array of objects
     function getTableData(tableId) {
-      var table = document.getElementById(tableId);
+      var table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
       var data = [];
       
-      var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+      var rows = table.getElementsByTagName('tr');
       for (var i = 0; i < rows.length; i++) {
         var row = rows[i];
         var rowData = {
@@ -309,10 +335,12 @@
         var dateCell = row.insertCell(0);
         var descriptionCell = row.insertCell(1);
         var amountCell = row.insertCell(2);
+        var selectCell = row.insertCell(3);
         
         dateCell.innerHTML = data[i].date;
         descriptionCell.innerHTML = data[i].description;
         amountCell.innerHTML = data[i].amount;
+        selectCell.innerHTML = '<input type="checkbox">';
       }
     }
     
@@ -345,6 +373,60 @@
       } else {
         totalAmountElement.classList.add('zero');
       }
+    }
+    
+    // Move selected items from one table to another
+    function moveSelectedItems(sourceTableId, destinationTableId) {
+      var sourceTable = document.getElementById(sourceTableId).getElementsByTagName('tbody')[0];
+      var destinationTable = document.getElementById(destinationTableId).getElementsByTagName('tbody')[0];
+      
+      var selectedItems = [];
+      
+      // Collect selected items
+      for (var i = 0; i < sourceTable.rows.length; i++) {
+        var row = sourceTable.rows[i];
+        var checkbox = row.cells[3].getElementsByTagName('input')[0];
+        
+        if (checkbox.checked) {
+          selectedItems.push(row);
+        }
+      }
+      
+      // Move selected items to the destination table
+      for (var j = 0; j < selectedItems.length; j++) {
+        var selectedItem = selectedItems[j];
+        sourceTable.removeChild(selectedItem);
+        destinationTable.appendChild(selectedItem);
+        
+        // Reset the checkbox
+        selectedItem.cells[3].getElementsByTagName('input')[0].checked = false;
+      }
+      
+      calculateTotalAmount();
+    }
+    
+    // Remove selected items from the table
+    function removeSelectedItems(tableId) {
+      var table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+      
+      // Collect selected items in an array
+      var selectedItems = [];
+      for (var i = 0; i < table.rows.length; i++) {
+        var row = table.rows[i];
+        var checkbox = row.cells[3].getElementsByTagName('input')[0];
+        
+        if (checkbox.checked) {
+          selectedItems.push(row);
+        }
+      }
+      
+      // Remove selected items from the table
+      for (var j = 0; j < selectedItems.length; j++) {
+        var selectedItem = selectedItems[j];
+        table.removeChild(selectedItem);
+      }
+      
+      calculateTotalAmount();
     }
   </script>
 </body>
