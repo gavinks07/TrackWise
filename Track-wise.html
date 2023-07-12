@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Track Wise - Expense and Profit Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f6f6f6;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    
+    h2 {
+      margin-top: 40px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .total-amount {
+      font-weight: bold;
+      padding: 12px;
+      border: 1px solid #ddd;
+      display: inline-block;
+      font-size: 18px;
+      width: fit-content;
+    }
+    
+    .positive {
+      background-color: #4caf50;
+      color: #fff;
+    }
+    
+    .negative {
+      background-color: #f44336;
+      color: #fff;
+    }
+    
+    .zero {
+      background-color: #777;
+      color: #fff;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+    }
+    
+    .form-group input[type="date"],
+    .form-group input[type="text"],
+    .form-group input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    
+    .form-group button {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      background-color: #4caf50;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    
+    th, td {
+      text-align: left;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Track Wise - Expense and Profit Tracker</h1>
+    
+    <div class="form-group">
+      <h2>Expenses</h2>
+      <table id="expenseTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Add expense rows dynamically using JavaScript -->
+        </tbody>
+      </table>
+      
+      <h2>Profits</h2>
+      <table id="profitTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Add profit rows dynamically using JavaScript -->
+        </tbody>
+      </table>
+      
+      <div class="total-amount" id="totalAmount"></div> <!-- Total amount box -->
+    </div>
+    
+    <div class="form-group">
+      <h2>Add Expense</h2>
+      <form id="expenseForm">
+        <label for="expenseDate">Date:</label>
+        <input type="date" id="expenseDate" required>
+        <label for="expenseDescription">Description:</label>
+        <input type="text" id="expenseDescription" required>
+        <label for="expenseAmount">Amount:</label>
+        <input type="number" id="expenseAmount" step="0.01" required>
+        <button type="submit">Add Expense</button>
+      </form>
+    </div>
+    
+    <div class="form-group">
+      <h2>Add Profit</h2>
+      <form id="profitForm">
+        <label for="profitDate">Date:</label>
+        <input type="date" id="profitDate" required>
+        <label for="profitDescription">Description:</label>
+        <input type="text" id="profitDescription" required>
+        <label for="profitAmount">Amount:</label>
+        <input type="number" id="profitAmount" step="0.01" required>
+        <button type="submit">Add Profit</button>
+      </form>
+    </div>
+    
+    <div class="form-group">
+      <h2>Save and Load Data</h2>
+      <button onclick="saveData()">Save Data</button>
+      <input type="file" id="fileInput" accept=".json" onchange="loadData(event)">
+    </div>
+  </div>
+  
+  <script>
+    // Add expense row to the table
+    function addExpense() {
+      var date = document.getElementById('expenseDate').value;
+      var description = document.getElementById('expenseDescription').value;
+      var amount = document.getElementById('expenseAmount').value;
+      
+      var table = document.getElementById('expenseTable').getElementsByTagName('tbody')[0];
+      var row = table.insertRow(-1);
+      
+      var dateCell = row.insertCell(0);
+      var descriptionCell = row.insertCell(1);
+      var amountCell = row.insertCell(2);
+      
+      dateCell.innerHTML = date;
+      descriptionCell.innerHTML = description;
+      amountCell.innerHTML = '$' + amount;
+      
+      // Clear the form fields
+      document.getElementById('expenseDate').value = '';
+      document.getElementById('expenseDescription').value = '';
+      document.getElementById('expenseAmount').value = '';
+      
+      calculateTotalAmount();
+    }
+    
+    // Add profit row to the table
+    function addProfit() {
+      var date = document.getElementById('profitDate').value;
+      var description = document.getElementById('profitDescription').value;
+      var amount = document.getElementById('profitAmount').value;
+      
+      var table = document.getElementById('profitTable').getElementsByTagName('tbody')[0];
+      var row = table.insertRow(-1);
+      
+      var dateCell = row.insertCell(0);
+      var descriptionCell = row.insertCell(1);
+      var amountCell = row.insertCell(2);
+      
+      dateCell.innerHTML = date;
+      descriptionCell.innerHTML = description;
+      amountCell.innerHTML = '$' + amount;
+      
+      // Clear the form fields
+      document.getElementById('profitDate').value = '';
+      document.getElementById('profitDescription').value = '';
+      document.getElementById('profitAmount').value = '';
+      
+      calculateTotalAmount();
+    }
+    
+    // Handle form submissions
+    document.getElementById('expenseForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      addExpense();
+    });
+    
+    document.getElementById('profitForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      addProfit();
+    });
+    
+    // Save data as a JSON file
+    function saveData() {
+      var data = {
+        expenses: getTableData('expenseTable'),
+        profits: getTableData('profitTable')
+      };
+      
+      var jsonData = JSON.stringify(data);
+      var blob = new Blob([jsonData], {type: 'application/json'});
+      var url = URL.createObjectURL(blob);
+      
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'expense_profit_data.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+    
+    // Get table data as an array of objects
+    function getTableData(tableId) {
+      var table = document.getElementById(tableId);
+      var data = [];
+      
+      var rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+      for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var rowData = {
+          date: row.cells[0].innerHTML,
+          description: row.cells[1].innerHTML,
+          amount: row.cells[2].innerHTML
+        };
+        data.push(rowData);
+      }
+      
+      return data;
+    }
+    
+    // Load data from a JSON file
+    function loadData(event) {
+      var file = event.target.files[0];
+      
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var jsonData = e.target.result;
+        var data = JSON.parse(jsonData);
+        
+        clearTable('expenseTable');
+        clearTable('profitTable');
+        
+        populateTable('expenseTable', data.expenses);
+        populateTable('profitTable', data.profits);
+        
+        calculateTotalAmount();
+      };
+      
+      reader.readAsText(file);
+    }
+    
+    // Clear the table
+    function clearTable(tableId) {
+      var table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+      
+      while (table.firstChild) {
+        table.removeChild(table.firstChild);
+      }
+    }
+    
+    // Populate the table with data
+    function populateTable(tableId, data) {
+      var table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+      
+      for (var i = 0; i < data.length; i++) {
+        var row = table.insertRow(-1);
+        var dateCell = row.insertCell(0);
+        var descriptionCell = row.insertCell(1);
+        var amountCell = row.insertCell(2);
+        
+        dateCell.innerHTML = data[i].date;
+        descriptionCell.innerHTML = data[i].description;
+        amountCell.innerHTML = data[i].amount;
+      }
+    }
+    
+    // Calculate the total amount (profits - expenses) and update the UI
+    function calculateTotalAmount() {
+      var expenseTable = document.getElementById('expenseTable').getElementsByTagName('tbody')[0];
+      var profitTable = document.getElementById('profitTable').getElementsByTagName('tbody')[0];
+      var totalAmountElement = document.getElementById('totalAmount');
+      
+      var totalAmount = 0;
+      
+      for (var i = 0; i < expenseTable.rows.length; i++) {
+        var expenseAmount = parseFloat(expenseTable.rows[i].cells[2].innerHTML.replace('$', ''));
+        totalAmount -= expenseAmount;
+      }
+      
+      for (var j = 0; j < profitTable.rows.length; j++) {
+        var profitAmount = parseFloat(profitTable.rows[j].cells[2].innerHTML.replace('$', ''));
+        totalAmount += profitAmount;
+      }
+      
+      totalAmountElement.innerHTML = '$' + totalAmount.toFixed(2);
+      
+      totalAmountElement.classList.remove('positive', 'negative', 'zero');
+      
+      if (totalAmount > 0) {
+        totalAmountElement.classList.add('positive');
+      } else if (totalAmount < 0) {
+        totalAmountElement.classList.add('negative');
+      } else {
+        totalAmountElement.classList.add('zero');
+      }
+    }
+  </script>
+</body>
+</html>
