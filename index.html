@@ -127,6 +127,7 @@
             <th>Description</th>
             <th>Amount</th>
             <th>Select</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -142,6 +143,7 @@
             <th>Description</th>
             <th>Amount</th>
             <th>Select</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -156,6 +158,7 @@
         <button onclick="moveSelectedItems('profitTable', 'expenseTable')">Move to Expenses</button>
         <button onclick="removeSelectedItems('expenseTable')">Remove Expenses</button>
         <button onclick="removeSelectedItems('profitTable')">Remove Profits</button>
+        <button onclick="editSelectedItem()">Edit Item</button>
       </div>
     </div>
     
@@ -169,6 +172,7 @@
         <label for="expenseAmount">Amount:</label>
         <input type="number" id="expenseAmount" step="0.01" required>
         <button type="submit">Add Expense</button>
+        <button type="button" onclick="clearExpenseForm()">Clear Form</button>
       </form>
     </div>
     
@@ -182,6 +186,7 @@
         <label for="profitAmount">Amount:</label>
         <input type="number" id="profitAmount" step="0.01" required>
         <button type="submit">Add Profit</button>
+        <button type="button" onclick="clearProfitForm()">Clear Form</button>
       </form>
     </div>
     
@@ -193,6 +198,8 @@
   </div>
   
   <script>
+    var selectedItem = null;
+    
     // Add expense row to the table
     function addExpense() {
       var date = document.getElementById('expenseDate').value;
@@ -206,11 +213,13 @@
       var descriptionCell = row.insertCell(1);
       var amountCell = row.insertCell(2);
       var selectCell = row.insertCell(3);
+      var actionCell = row.insertCell(4);
       
       dateCell.innerHTML = date;
       descriptionCell.innerHTML = description;
       amountCell.innerHTML = '$' + amount;
       selectCell.innerHTML = '<input type="checkbox">';
+      actionCell.innerHTML = '<button onclick="selectItem(this)">Edit</button>';
       
       // Clear the form fields
       document.getElementById('expenseDate').value = '';
@@ -233,11 +242,13 @@
       var descriptionCell = row.insertCell(1);
       var amountCell = row.insertCell(2);
       var selectCell = row.insertCell(3);
+      var actionCell = row.insertCell(4);
       
       dateCell.innerHTML = date;
       descriptionCell.innerHTML = description;
       amountCell.innerHTML = '$' + amount;
       selectCell.innerHTML = '<input type="checkbox">';
+      actionCell.innerHTML = '<button onclick="selectItem(this)">Edit</button>';
       
       // Clear the form fields
       document.getElementById('profitDate').value = '';
@@ -250,12 +261,20 @@
     // Handle form submissions
     document.getElementById('expenseForm').addEventListener('submit', function(event) {
       event.preventDefault();
-      addExpense();
+      if (selectedItem) {
+        updateExpense();
+      } else {
+        addExpense();
+      }
     });
     
     document.getElementById('profitForm').addEventListener('submit', function(event) {
       event.preventDefault();
-      addProfit();
+      if (selectedItem) {
+        updateProfit();
+      } else {
+        addProfit();
+      }
     });
     
     // Save data as a JSON file
@@ -336,11 +355,13 @@
         var descriptionCell = row.insertCell(1);
         var amountCell = row.insertCell(2);
         var selectCell = row.insertCell(3);
+        var actionCell = row.insertCell(4);
         
         dateCell.innerHTML = data[i].date;
         descriptionCell.innerHTML = data[i].description;
         amountCell.innerHTML = data[i].amount;
         selectCell.innerHTML = '<input type="checkbox">';
+        actionCell.innerHTML = '<button onclick="selectItem(this)">Edit</button>';
       }
     }
     
@@ -427,6 +448,78 @@
       }
       
       calculateTotalAmount();
+    }
+    
+    // Select an item for editing
+    function selectItem(button) {
+      var row = button.parentNode.parentNode;
+      var tableId = row.parentNode.parentNode.id;
+      var form, dateInput, descriptionInput, amountInput;
+      
+      selectedItem = {
+        row: row,
+        date: row.cells[0].innerHTML,
+        description: row.cells[1].innerHTML,
+        amount: row.cells[2].innerHTML
+      };
+      
+      if (tableId === 'expenseTable') {
+        form = document.getElementById('expenseForm');
+        dateInput = document.getElementById('expenseDate');
+        descriptionInput = document.getElementById('expenseDescription');
+        amountInput = document.getElementById('expenseAmount');
+      } else if (tableId === 'profitTable') {
+        form = document.getElementById('profitForm');
+        dateInput = document.getElementById('profitDate');
+        descriptionInput = document.getElementById('profitDescription');
+        amountInput = document.getElementById('profitAmount');
+      }
+      
+      dateInput.value = selectedItem.date;
+      descriptionInput.value = selectedItem.description;
+      amountInput.value = selectedItem.amount.replace('$', '');
+      
+      form.querySelector('button[type="submit"]').innerHTML = 'Update Item';
+    }
+    
+    // Update the selected expense item
+    function updateExpense() {
+      selectedItem.row.cells[0].innerHTML = document.getElementById('expenseDate').value;
+      selectedItem.row.cells[1].innerHTML = document.getElementById('expenseDescription').value;
+      selectedItem.row.cells[2].innerHTML = '$' + document.getElementById('expenseAmount').value;
+      
+      clearExpenseForm();
+      calculateTotalAmount();
+    }
+    
+    // Update the selected profit item
+    function updateProfit() {
+      selectedItem.row.cells[0].innerHTML = document.getElementById('profitDate').value;
+      selectedItem.row.cells[1].innerHTML = document.getElementById('profitDescription').value;
+      selectedItem.row.cells[2].innerHTML = '$' + document.getElementById('profitAmount').value;
+      
+      clearProfitForm();
+      calculateTotalAmount();
+    }
+    
+    // Clear the expense form
+    function clearExpenseForm() {
+      document.getElementById('expenseDate').value = '';
+      document.getElementById('expenseDescription').value = '';
+      document.getElementById('expenseAmount').value = '';
+      
+      document.getElementById('expenseForm').querySelector('button[type="submit"]').innerHTML = 'Add Expense';
+      selectedItem = null;
+    }
+    
+    // Clear the profit form
+    function clearProfitForm() {
+      document.getElementById('profitDate').value = '';
+      document.getElementById('profitDescription').value = '';
+      document.getElementById('profitAmount').value = '';
+      
+      document.getElementById('profitForm').querySelector('button[type="submit"]').innerHTML = 'Add Profit';
+      selectedItem = null;
     }
   </script>
 </body>
