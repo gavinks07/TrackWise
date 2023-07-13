@@ -272,25 +272,33 @@
       }
     });
     
-    // Save data as a JSON file
-    function saveData() {
-      var data = {
-        expenses: getTableData('expenseTable'),
-        profits: getTableData('profitTable')
-      };
-      
-      var jsonData = JSON.stringify(data);
-      var blob = new Blob([jsonData], {type: 'application/json'});
-      var url = URL.createObjectURL(blob);
-      
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'expense_profit_data.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-    
+    // Save data as a JSON file with custom filename
+	function saveData() {
+	  var data = {
+		expenses: getTableData('expenseTable'),
+		profits: getTableData('profitTable')
+	  };
+	  
+	  var jsonData = JSON.stringify(data);
+	  var blob = new Blob([jsonData], {type: 'application/json'});
+	  
+	  var a = document.createElement('a');
+	  a.href = URL.createObjectURL(blob);
+	  a.download = 'expense_profit_data.json';
+	  
+	  // Prompt user to save the file with custom filename
+	  var customFilename = prompt('Enter the filename to save as:');
+	  if (customFilename) {
+		a.download = customFilename.trim() + '.json';
+	  } else {
+		// Cancelled or empty filename, use the default filename
+		a.download = 'expense_profit_data.json';
+	  }
+	  
+	  document.body.appendChild(a);
+	  a.click();
+	  document.body.removeChild(a);
+	}
     // Get table data as an array of objects
     function getTableData(tableId) {
       var table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
