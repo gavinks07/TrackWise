@@ -219,7 +219,7 @@
       descriptionCell.innerHTML = description;
       amountCell.innerHTML = '$' + amount;
       selectCell.innerHTML = '<input type="checkbox">';
-      actionCell.innerHTML = '<button onclick="selectItem(this)">Edit</button>';
+      actionCell.innerHTML = '<button onclick="editItem(this)">Edit</button>';
       
       // Clear the form fields
       document.getElementById('expenseDate').value = '';
@@ -248,7 +248,7 @@
       descriptionCell.innerHTML = description;
       amountCell.innerHTML = '$' + amount;
       selectCell.innerHTML = '<input type="checkbox">';
-      actionCell.innerHTML = '<button onclick="selectItem(this)">Edit</button>';
+      actionCell.innerHTML = '<button onclick="editItem(this)">Edit</button>';
       
       // Clear the form fields
       document.getElementById('profitDate').value = '';
@@ -361,7 +361,7 @@
         descriptionCell.innerHTML = data[i].description;
         amountCell.innerHTML = data[i].amount;
         selectCell.innerHTML = '<input type="checkbox">';
-        actionCell.innerHTML = '<button onclick="selectItem(this)">Edit</button>';
+        actionCell.innerHTML = '<button onclick="editItem(this)">Edit</button>';
       }
     }
     
@@ -450,8 +450,8 @@
       calculateTotalAmount();
     }
     
-    // Select an item for editing
-    function selectItem(button) {
+    // Edit the selected item
+    function editItem(button) {
       var row = button.parentNode.parentNode;
       var tableId = row.parentNode.parentNode.id;
       var form, dateInput, descriptionInput, amountInput;
@@ -479,7 +479,11 @@
       descriptionInput.value = selectedItem.description;
       amountInput.value = selectedItem.amount.replace('$', '');
       
-      form.querySelector('button[type="submit"]').innerHTML = 'Update Item';
+      form.querySelector('button[type="submit"]').innerHTML = 'Save Item';
+      button.innerHTML = 'Cancel';
+      
+      // Disable form fields for other items
+      disableOtherItems(tableId);
     }
     
     // Update the selected expense item
@@ -510,6 +514,9 @@
       
       document.getElementById('expenseForm').querySelector('button[type="submit"]').innerHTML = 'Add Expense';
       selectedItem = null;
+      
+      // Enable all items
+      enableAllItems('expenseTable');
     }
     
     // Clear the profit form
@@ -520,6 +527,40 @@
       
       document.getElementById('profitForm').querySelector('button[type="submit"]').innerHTML = 'Add Profit';
       selectedItem = null;
+      
+      // Enable all items
+      enableAllItems('profitTable');
+    }
+    
+    // Disable form fields for other items
+    function disableOtherItems(tableId) {
+      var table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+      
+      for (var i = 0; i < table.rows.length; i++) {
+        var row = table.rows[i];
+        
+        if (row !== selectedItem.row) {
+          var inputs = row.getElementsByTagName('input');
+          
+          for (var j = 0; j < inputs.length; j++) {
+            inputs[j].disabled = true;
+          }
+        }
+      }
+    }
+    
+    // Enable all items
+    function enableAllItems(tableId) {
+      var table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+      
+      for (var i = 0; i < table.rows.length; i++) {
+        var row = table.rows[i];
+        var inputs = row.getElementsByTagName('input');
+        
+        for (var j = 0; j < inputs.length; j++) {
+          inputs[j].disabled = false;
+        }
+      }
     }
   </script>
 </body>
