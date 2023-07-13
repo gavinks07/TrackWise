@@ -100,10 +100,6 @@
       background-color: #f2f2f2;
     }
     
-    .selected {
-      background-color: #e0e0e0;
-    }
-    
     .buttons {
       display: flex;
       margin-top: 10px;
@@ -111,11 +107,6 @@
     
     .buttons button {
       margin-right: 10px;
-    }
-    
-    .edit-input {
-      display: none;
-      width: 100%;
     }
   </style>
 </head>
@@ -163,7 +154,6 @@
         <button onclick="moveSelectedItems('profitTable', 'expenseTable')">Move to Expenses</button>
         <button onclick="removeSelectedItems('expenseTable')">Remove Expenses</button>
         <button onclick="removeSelectedItems('profitTable')">Remove Profits</button>
-        <button onclick="editSelectedItem()">Edit Item</button>
       </div>
     </div>
     
@@ -203,7 +193,7 @@
   </div>
   
   <script>
-    var selectedItem = null;
+    var selectedItem = null; // Global variable to store the selected item
     
     // Add expense row to the table
     function addExpense() {
@@ -267,7 +257,7 @@
     document.getElementById('expenseForm').addEventListener('submit', function(event) {
       event.preventDefault();
       if (selectedItem) {
-        updateExpense();
+        saveItem('expenseTable');
       } else {
         addExpense();
       }
@@ -276,7 +266,7 @@
     document.getElementById('profitForm').addEventListener('submit', function(event) {
       event.preventDefault();
       if (selectedItem) {
-        updateProfit();
+        saveItem('profitTable');
       } else {
         addProfit();
       }
@@ -455,97 +445,6 @@
       calculateTotalAmount();
     }
     
-    // Edit the selected item
-    function editItem(button) {
-      var row = button.parentNode.parentNode;
-      
-      // Remove the selected class from other rows
-      var table = row.parentNode.parentNode;
-      var rows = table.getElementsByTagName('tr');
-      for (var i = 0; i < rows.length; i++) {
-        rows[i].classList.remove('selected');
-      }
-      
-      row.classList.add('selected');
-      
-      var form, dateInput, descriptionInput, amountInput;
-      selectedItem = {
-        row: row,
-        date: row.cells[0].innerHTML,
-        description: row.cells[1].innerHTML,
-        amount: row.cells[2].innerHTML
-      };
-      
-      if (table.id === 'expenseTable') {
-        form = document.getElementById('expenseForm');
-        dateInput = document.getElementById('expenseDate');
-        descriptionInput = document.getElementById('expenseDescription');
-        amountInput = document.getElementById('expenseAmount');
-      } else if (table.id === 'profitTable') {
-        form = document.getElementById('profitForm');
-        dateInput = document.getElementById('profitDate');
-        descriptionInput = document.getElementById('profitDescription');
-        amountInput = document.getElementById('profitAmount');
-      }
-      
-      // Set the input values to the selected item's values
-      dateInput.value = selectedItem.date;
-      descriptionInput.value = selectedItem.description;
-      amountInput.value = selectedItem.amount.replace('$', '');
-      
-      // Show the edit input fields
-      row.cells[0].innerHTML = '<input type="date" class="edit-input" value="' + selectedItem.date + '">';
-      row.cells[1].innerHTML = '<input type="text" class="edit-input" value="' + selectedItem.description + '">';
-      row.cells[2].innerHTML = '<input type="number" class="edit-input" step="0.01" value="' + selectedItem.amount.replace('$', '') + '">';
-      
-      // Change the button to save mode
-      button.innerHTML = 'Save';
-      button.setAttribute('onclick', 'saveItem(this)');
-      
-      // Disable other buttons while editing
-      disableButtons();
-    }
-    
-    // Save the edited item
-    function saveItem(button) {
-      var row = button.parentNode.parentNode;
-      var table = row.parentNode.parentNode;
-      var dateInput = row.cells[0].querySelector('.edit-input');
-      var descriptionInput = row.cells[1].querySelector('.edit-input');
-      var amountInput = row.cells[2].querySelector('.edit-input');
-      
-      // Update the row values
-      row.cells[0].innerHTML = dateInput.value;
-      row.cells[1].innerHTML = descriptionInput.value;
-      row.cells[2].innerHTML = '$' + amountInput.value;
-      
-      // Reset the button
-      button.innerHTML = 'Edit';
-      button.setAttribute('onclick', 'editItem(this)');
-      
-      // Enable the other buttons
-      enableButtons();
-      
-      // Calculate total amount
-      calculateTotalAmount();
-    }
-    
-    // Disable buttons while editing an item
-    function disableButtons() {
-      var buttons = document.querySelectorAll('.buttons button');
-      for (var i = 0; i < buttons.length; i++) {
-        buttons[i].disabled = true;
-      }
-    }
-    
-    // Enable buttons after saving an item
-    function enableButtons() {
-      var buttons = document.querySelectorAll('.buttons button');
-      for (var i = 0; i < buttons.length; i++) {
-        buttons[i].disabled = false;
-      }
-    }
-    
     // Clear the expense form
     function clearExpenseForm() {
       document.getElementById('expenseDate').value = '';
@@ -560,6 +459,48 @@
       document.getElementById('profitDescription').value = '';
       document.getElementById('profitAmount').value = '';
       selectedItem = null;
+    }
+    
+    // Edit an item in the table
+    function editItem(button) {
+      var row = button.parentNode.parentNode;
+      var table = row.parentNode.parentNode;
+      
+      // Save the reference to the selected item
+      selectedItem = row;
+      
+      // Populate the form fields with the item data
+      if (table.id === 'expenseTable') {
+        document.getElementById('expenseDate').value = row.cells[0].innerHTML;
+        document.getElementById('expenseDescription').value = row.cells[1].innerHTML;
+        document.getElementById('expenseAmount').value = parseFloat(row.cells[2].innerHTML.replace('$', ''));
+      } else if (table.id === 'profitTable') {
+        document.getElementById('profitDate').value = row.cells[0].innerHTML;
+        document.getElementById('profitDescription').value = row.cells[1].innerHTML;
+        document.getElementById('profitAmount').value = parseFloat(row.cells[2].innerHTML.replace('$', ''));
+      }
+    }
+    
+    // Save the edited item
+    function saveItem(tableId) {
+      var table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+      
+      var date = document.getElementById(tableId === 'expenseTable' ? 'expenseDate' : 'profitDate').value;
+      var description = document.getElementById(tableId === 'expenseTable' ? 'expenseDescription' : 'profitDescription').value;
+      var amount = document.getElementById(tableId === 'expenseTable' ? 'expenseAmount' : 'profitAmount').value;
+      
+      selectedItem.cells[0].innerHTML = date;
+      selectedItem.cells[1].innerHTML = description;
+      selectedItem.cells[2].innerHTML = '$' + amount;
+      
+      // Clear the form fields and reset the selected item
+      if (tableId === 'expenseTable') {
+        clearExpenseForm();
+      } else if (tableId === 'profitTable') {
+        clearProfitForm();
+      }
+      
+      calculateTotalAmount();
     }
   </script>
 </body>
